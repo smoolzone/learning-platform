@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>📚 {{ topic_data.name }}</h1>
+    <p>{{ topic_data.description }}</p>
+    <a href="/" class="btn">← Back to Topics</a>
+</div>
+
+{% if content.videos %}
+<div class="content-section">
+    <h2>🎥 Videos</h2>
+    {% for video in content.videos %}
+    <div class="video-container">
+        <h3>{{ video.title }}</h3>
+        <p>{{ video.description }}</p>
+        <div style="margin: 10px 0;">
+            <iframe width="300" height="169" src="{{ video.url }}" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <button class="btn" 
+                hx-post="/chat/{{ topic }}/query" 
+                hx-target="#chatMessages"
+                hx-vals='{"message": "Tell me about {{ video.title }}"}'>
+            Ask AI about this
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if content.books %}
+<div class="content-section">
+    <h2>📖 Books & Resources</h2>
+    {% for book in content.books %}
+    <div style="padding: 15px; margin: 10px 0; background: #f8f9fa; border-radius: 5px;">
+        <h3>{{ book.title }}</h3>
+        <p>{{ book.description }}</p>
+        <button class="btn" 
+                hx-post="/chat/{{ topic }}/query" 
+                hx-target="#chatMessages"
+                hx-vals='{"message": "Tell me about {{ book.title }}"}'>
+            Ask AI about this
+        </button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+{% if not content %}
+<div class="content-section">
+    <p>No content available yet for this topic. Check back soon!</p>
+</div>
+{% endif %}
+{% endblock %}

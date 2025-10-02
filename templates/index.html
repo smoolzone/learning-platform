@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🌿 Learning Platform</h1>
+    <p>Explore specialized knowledge with AI assistance</p>
+</div>
+
+<div class="topic-grid">
+    <div class="topic-card">
+        <div class="topic-icon">🌿</div>
+        <h2>Natural Health</h2>
+        <p>Traditional remedies and natural healing practices from around the world.</p>
+        <div class="topic-actions">
+            <a href="/browse/natural_health" class="btn">Browse Content</a>
+            <a href="/chat/natural_health" class="btn btn-secondary">Chat with AI</a>
+        </div>
+    </div>
+    
+    <div class="topic-card">
+        <div class="topic-icon">🏛️</div>
+        <h2>Lost History</h2>
+        <p>Forgotten civilizations, archaeological mysteries, and alternative historical perspectives.</p>
+        <div class="topic-actions">
+            <a href="/browse/lost_history" class="btn">Browse Content</a>
+            <a href="/chat/lost_history" class="btn btn-secondary">Chat with AI</a>
+        </div>
+    </div>
+    
+    <div class="topic-card">
+        <div class="topic-icon">📜</div>
+        <h2>Apocrypha</h2>
+        <p>Non-canonical religious texts, Gnostic gospels, and suppressed spiritual writings.</p>
+        <div class="topic-actions">
+            <a href="/browse/apocrypha" class="btn">Browse Content</a>
+            <a href="/chat/apocrypha" class="btn btn-secondary">Chat with AI</a>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <h3>How to Use This Platform</h3>
+    <div style="margin-top: 1rem; line-height: 2;">
+        <p>• <strong>Browse Topics:</strong> Explore curated content organized by specialized subjects</p>
+        <p>• <strong>AI Assistant:</strong> Get personalized help and explanations in the sidebar</p>
+        <p>• <strong>Deep Learning:</strong> Dive into niche subjects with expert guidance</p>
+        <p>• <strong>Rich Resources:</strong> Access videos, books, and presentations</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Learning Platform</title>
+    <script src="/static/htmx.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-sidebar: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --accent-primary: #3b82f6;
+            --border-color: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .main-content {
+            flex: 1;
+            padding: 2rem;
+            max-width: 800px;
+            margin-right: 400px;
+        }
+
+        /* Fixed Sidebar */
+        .chat-sidebar {
+            width: 400px;
+            background: var(--bg-sidebar);
+            border-left: 1px solid var(--border-color);
+            padding: 1.5rem;
+            height: 100vh;
+            position: fixed;
+            right: 0;
+            top: 0;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 1rem;
+        }
+
+        .sidebar-header h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-header p {
+            color: var(--text-secondary);
+            font-size: 0.9em;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 12px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .user-message {
+            background: var(--accent-primary);
+            color: white;
+            margin-left: 1rem;
+        }
+
+        .ai-message {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            margin-right: 1rem;
+        }
+
+        .error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .message-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.9em;
+        }
+
+        .message-content {
+            line-height: 1.5;
+        }
+
+        /* Chat Input */
+        .chat-input {
+            display: flex;
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-size: 1em;
+        }
+
+        .chat-input input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 1em;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: #374151;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .header h1 {
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+        }
+
+        /* Topic Grid */
+        .topic-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .topic-card {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: transform 0.2s ease;
+        }
+
+        .topic-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .topic-icon {
+            font-size: 2.5em;
+            margin-bottom: 1rem;
+        }
+
+        .topic-card h2 {
+            margin-bottom: 0.5rem;
+        }
+
+        .topic-card p {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+        }
+
+        .topic-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: var(--bg-secondary);
+            padding: 2rem;
+            margin: 2rem 0;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .main-content {
+                margin-right: 400px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .chat-sidebar {
+                display: none;
+            }
+            .main-content {
+                margin-right: 0;
+                padding: 1rem;
+            }
+            .topic-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+    
+    <div class="chat-sidebar">
+        <div class="sidebar-header">
+            <h3>🤖 AI Assistant</h3>
+            <p>Ask about {{ current_topic|default('natural_health') }}</p>
+        </div>
+        
+        <div class="chat-messages" id="chatMessages">
+            <div class="message ai-message">
+                <div class="message-header">
+                    <span>🤖</span>
+                    <strong>AI Assistant</strong>
+                </div>
+                <div class="message-content">
+                    Hello! I can help you explore {{ current_topic|default('natural health') }}. What would you like to learn?
+                </div>
+            </div>
+        </div>
+        
+        <form class="chat-input" 
+              hx-post="/chat/{{ current_topic|default('natural_health') }}/query" 
+              hx-target="#chatMessages"
+              hx-swap="beforeend"
+              _="on htmx:afterRequest reset() me">
+            <input type="text" name="message" placeholder="Ask a question..." required>
+            <button type="submit" class="btn">Send</button>
+        </form>
+    </div>
+
+    <script>
+        // Auto-scroll to bottom
+        function scrollToBottom() {
+            const chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        document.addEventListener('htmx:afterSwap', scrollToBottom);
+        document.addEventListener('DOMContentLoaded', scrollToBottom);
+    </script>
+</body>
+</html>

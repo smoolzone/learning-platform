@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>💬 Chat about {{ topic_data.name }}</h1>
+    <p>Ask me anything about {{ topic_data.name|lower }}</p>
+    <a href="/browse/{{ topic }}" class="btn">Browse Content</a>
+    <a href="/" class="btn">All Topics</a>
+</div>
+
+<div class="content-section">
+    <h3>Suggested Questions:</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
+        <button class="btn" 
+                hx-post="/chat/{{ topic }}/query" 
+                hx-target="#chatMessages"
+                hx-vals='{"message": "What are the key concepts in {{ topic_data.name|lower }}?"}'>
+            Key Concepts
+        </button>
+        <button class="btn" 
+                hx-post="/chat/{{ topic }}/query" 
+                hx-target="#chatMessages"
+                hx-vals='{"message": "Recommend learning resources for {{ topic_data.name|lower }}"}'>
+            Learning Resources
+        </button>
+        <button class="btn" 
+                hx-post="/chat/{{ topic }}/query" 
+                hx-target="#chatMessages"
+                hx-vals='{"message": "How do I get started with {{ topic_data.name|lower }}?"}'>
+            Getting Started
+        </button>
+    </div>
+</div>
+{% endblock %}
