@@ -16,6 +16,16 @@
             --border-color: #334155;
         }
 
+        [data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-sidebar: #f1f5f9;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --accent-primary: #3b82f6;
+            --border-color: #e2e8f0;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -28,6 +38,68 @@
             color: var(--text-primary);
             display: flex;
             min-height: 100vh;
+            transition: all 0.3s ease;
+        }
+
+        /* Navigation Header */
+        .nav-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: transparent;
+            z-index: 1000;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            background: var(--accent-primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: background 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: #2563eb;
+        }
+
+        .nav-btn.secondary {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .nav-btn.secondary:hover {
+            background: var(--bg-secondary);
+        }
+
+        .theme-toggle {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1.2em;
+            transition: all 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background: var(--bg-secondary);
         }
 
         .main-content {
@@ -35,6 +107,7 @@
             padding: 2rem;
             max-width: 800px;
             margin-right: 400px;
+            margin-top: 80px; /* Account for fixed nav */
         }
 
         /* Fixed Sidebar */
@@ -50,6 +123,8 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            /* Account for fixed nav */
+            height: 100vh;
         }
 
         .sidebar-header {
@@ -111,6 +186,31 @@
             line-height: 1.5;
         }
 
+        .message-content p {
+            margin: 0.5rem 0;
+            line-height: 1.6;
+        }
+
+        .message-content strong {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+
+        .message-content em {
+            font-style: italic;
+            color: var(--text-secondary);
+        }
+
+        .message-content ul {
+            margin: 0.5rem 0;
+            padding-left: 1.5rem;
+        }
+
+        .message-content li {
+            margin: 0.25rem 0;
+            line-height: 1.5;
+        }
+
         /* Chat Input */
         .chat-input {
             display: flex;
@@ -157,7 +257,7 @@
         }
 
         .btn-secondary:hover {
-            background: #374151;
+            background: var(--bg-primary);
         }
 
         /* Header */
@@ -235,12 +335,26 @@
         }
 
         @media (max-width: 768px) {
+            .nav-header {
+                padding: 1rem;
+            }
+            
+            .nav-buttons {
+                gap: 0.25rem;
+            }
+            
+            .nav-btn {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.8em;
+            }
+            
             .chat-sidebar {
                 display: none;
             }
             .main-content {
                 margin-right: 0;
                 padding: 1rem;
+                margin-top: 70px;
             }
             .topic-grid {
                 grid-template-columns: 1fr;
@@ -254,6 +368,17 @@
     </style>
 </head>
 <body>
+    <!-- Navigation Header -->
+    <div class="nav-header">
+        <div class="nav-buttons">
+            <button class="nav-btn secondary" onclick="goBack()">← Back</button>
+            <a href="/" class="nav-btn">🏠 Home</a>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()">
+            <span id="theme-icon">🌙</span>
+        </button>
+    </div>
+    
     <div class="main-content">
         {% block content %}{% endblock %}
     </div>
@@ -287,6 +412,40 @@
     </div>
 
     <script>
+        // Theme management
+        function getTheme() {
+            return localStorage.getItem('theme') || 'dark';
+        }
+
+        function setTheme(theme) {
+            localStorage.setItem('theme', theme);
+            document.documentElement.setAttribute('data-theme', theme);
+            updateThemeIcon(theme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = getTheme();
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            setTheme(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('theme-icon');
+            icon.textContent = theme === 'dark' ? '🌙' : '☀️';
+        }
+
+        // Initialize theme
+        setTheme(getTheme());
+
+        // Back button functionality
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/';
+            }
+        }
+
         // Auto-scroll to bottom
         function scrollToBottom() {
             const chatMessages = document.getElementById('chatMessages');
@@ -295,6 +454,19 @@
 
         document.addEventListener('htmx:afterSwap', scrollToBottom);
         document.addEventListener('DOMContentLoaded', scrollToBottom);
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+/ or Cmd+/ to toggle theme
+            if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+                e.preventDefault();
+                toggleTheme();
+            }
+            // Escape key to go back
+            if (e.key === 'Escape') {
+                goBack();
+            }
+        });
     </script>
 </body>
 </html>

@@ -2,33 +2,33 @@
 
 {% block content %}
 <div class="header">
-    <h1>💬 Chat about {{ topic_data.name }}</h1>
-    <p>Ask me anything about {{ topic_data.name|lower }}</p>
-    <a href="/browse/{{ topic }}" class="btn">Browse Content</a>
-    <a href="/" class="btn">All Topics</a>
+    <h1>{{ topic_data.icon }} {{ topic_data.name }}</h1>
+    <p>{{ topic_data.description }}</p>
 </div>
 
 <div class="content-section">
-    <h3>Suggested Questions:</h3>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin: 15px 0;">
-        <button class="btn" 
-                hx-post="/chat/{{ topic }}/query" 
-                hx-target="#chatMessages"
-                hx-vals='{"message": "What are the key concepts in {{ topic_data.name|lower }}?"}'>
-            Key Concepts
-        </button>
-        <button class="btn" 
-                hx-post="/chat/{{ topic }}/query" 
-                hx-target="#chatMessages"
-                hx-vals='{"message": "Recommend learning resources for {{ topic_data.name|lower }}"}'>
-            Learning Resources
-        </button>
-        <button class="btn" 
-                hx-post="/chat/{{ topic }}/query" 
-                hx-target="#chatMessages"
-                hx-vals='{"message": "How do I get started with {{ topic_data.name|lower }}?"}'>
-            Getting Started
-        </button>
+    <h3>Chat with AI Assistant</h3>
+    <p>Ask questions about {{ topic_data.name }} and get AI-powered responses.</p>
+    
+    <div style="margin-top: 2rem; padding: 1.5rem; background: var(--bg-primary); border-radius: 8px;">
+        <p><strong>Session ID:</strong> <code>{{ session_id or "Creating session..." }}</code></p>
+        <p class="text-gray-400" style="margin-top: 0.5rem; font-size: 0.9em;">
+            This session maintains conversation context. If you refresh the page, a new session will be created.
+        </p>
+    </div>
+</div>
+
+<div class="content-section">
+    <h3>About {{ topic_data.name }}</h3>
+    <div style="margin-top: 1rem; line-height: 1.6;">
+        <p>Start a conversation with the AI assistant to explore {{ topic_data.name|lower }}. You can ask about:</p>
+        <ul style="margin-top: 1rem; margin-left: 1.5rem;">
+            <li>Key concepts and principles</li>
+            <li>Historical context and background</li>
+            <li>Practical applications</li>
+            <li>Related topics and connections</li>
+            <li>Recommended resources for further learning</li>
+        </ul>
     </div>
 </div>
 {% endblock %}

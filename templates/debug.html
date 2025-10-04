@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🔧 API Debug</h1>
+    <p>Test RAGFlow API endpoints</p>
+</div>
+
+<div class="content-section">
+    <h3>Connection Status</h3>
+    <div id="connectionStatus">Testing connection...</div>
+    <button onclick="testConnection()" class="btn">Test Connection</button>
+</div>
+
+<div class="content-section">
+    <h3>Test Chat Endpoints</h3>
+    <form onsubmit="testEndpoint(event)">
+        <input type="text" name="message" placeholder="Test message" value="Hello, are you working?" required>
+        <button type="submit" class="btn">Test Endpoint</button>
+    </form>
+    <div id="testResults" style="margin-top: 1rem;"></div>
+</div>
+
+<script>
+async function testConnection() {
+    const statusDiv = document.getElementById('connectionStatus');
+    statusDiv.innerHTML = 'Testing...';
+    
+    try {
+        const response = await fetch('/api/health');
+        const data = await response.json();
+        statusDiv.innerHTML = `
+            <p><strong>Status:</strong> ${data.status}</p>
+            <p><strong>Proxy Connection:</strong> ${data.proxy_connection ? '✅ Connected' : '❌ Failed'}</p>
+            <p><strong>Working Endpoint:</strong> ${data.working_endpoint || 'None found'}</p>
+        `;
+    } catch (error) {
+        statusDiv.innerHTML = `❌ Error: ${error.message}`;
+    }
+}
+
+async function testEndpoint(event) {
+    event.preventDefault();
+    const formData = new FormData(event.target);
+    const message = formData.get('message');
+    const resultsDiv = document.getElementById('testResults');
+    
+    resultsDiv.innerHTML = 'Testing...';
+    
+    try {
+        const response = await fetch('/chat/natural_health/query', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `message=${encodeURIComponent(message)}&session_id=test-session`
+        });
+        
+        const html = await response.text();
+        resultsDiv.innerHTML = html;
+    } catch (error) {
+        resultsDiv.innerHTML = `<div class="message error">Test failed: ${error.message}</div>`;
+    }
+}
+
+// Test connection on page load
+document.addEventListener('DOMContentLoaded', testConnection);
+</script>
+{% endblock %}
