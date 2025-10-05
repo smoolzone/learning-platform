@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🤖 {{ kb.name }} Assistant</h1>
+    <p>Chat with AI about {{ kb.subject or "your knowledge base" }}</p>
+    <div style="margin-top: 1rem;">
+        <a href="/knowledge-bases/{{ kb.id }}" class="btn btn-secondary" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+            <span>📁</span>
+            <span>Manage Files</span>
+        </a>
+    </div>
+</div>
+
+<div class="content-section">
+    <h3>Chat Interface</h3>
+    <p>Ask questions about your uploaded content. The AI will provide answers based on your knowledge base.</p>
+    
+    <div id="kbChatMessages" style="min-height: 400px; max-height: 600px; overflow-y: auto; margin: 2rem 0; padding: 1rem; background: var(--bg-primary); border-radius: 12px; display: flex; flex-direction: column; gap: 1rem;">
+        <div class="message ai-message">
+            <div class="message-header">
+                <span>🤖</span>
+                <strong>{{ kb.name }} Assistant</strong>
+            </div>
+            <div class="message-content">
+                <p>Hello! I'm your AI assistant for <strong>{{ kb.name }}</strong>. I can help you answer questions based on the content you've uploaded to this knowledge base.</p>
+                <p>What would you like to know about {{ kb.subject or "your content" }}?</p>
+            </div>
+        </div>
+    </div>
+    
+    <form class="chat-input" 
+          hx-post="/knowledge-bases/{{ kb.id }}/chat" 
+          hx-target="#kbChatMessages"
+          hx-swap="beforeend"
+          _="on htmx:afterRequest reset() me">
+        <input type="hidden" name="session_id" value="{{ session_id }}">
+        <input type="text" name="message" placeholder="Ask a question about {{ kb.name }}..." required style="flex: 1;">
+        <button type="submit" class="btn">Send</button>
+    </form>
+</div>
+
+<div class="content-section">
+    <h3>📊 Knowledge Base Info</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">📁</div>
+            <div style="font-size: 1.5em; font-weight: bold;">{{ kb.file_count }}</div>
+            <div>Files Uploaded</div>
+        </div>
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">📚</div>
+            <div style="font-size: 1.2em; font-weight: bold;">{{ kb.subject or "General" }}</div>
+            <div>Subject</div>
+        </div>
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px; text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">📅</div>
+            <div style="font-size: 1.2em; font-weight: bold;">{{ kb.created_at[:10] }}</div>
+            <div>Created</div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-scroll to bottom of chat
+function scrollToBottom() {
+    const chatMessages = document.getElementById('kbChatMessages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+document.addEventListener('htmx:afterSwap', scrollToBottom);
+document.addEventListener('DOMContentLoaded', scrollToBottom);
+</script>
+{% endblock %}

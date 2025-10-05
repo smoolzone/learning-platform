@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>📚 My Knowledge Bases</h1>
+    <p>Create and manage your custom AI assistants for specific subjects</p>
+</div>
+
+<div class="content-section">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+        <h3>Your Knowledge Bases</h3>
+        <a href="/knowledge-bases/create" class="btn" style="display: flex; align-items: center; gap: 0.5rem;">
+            <span>➕</span>
+            <span>Create New</span>
+        </a>
+    </div>
+
+    {% if knowledge_bases %}
+    <div class="topic-grid">
+        {% for kb_id, kb in knowledge_bases.items() %}
+        <div class="topic-card">
+            <div class="topic-icon">📖</div>
+            <h2>{{ kb.name }}</h2>
+            <p><strong>Subject:</strong> {{ kb.subject or "General" }}</p>
+            <p>{{ kb.description }}</p>
+            <div style="margin: 1rem 0; padding: 0.75rem; background: var(--bg-primary); border-radius: 8px;">
+                <small>
+                    <strong>Files:</strong> {{ kb.file_count }}<br>
+                    <strong>Created:</strong> {{ kb.created_at[:10] }}
+                </small>
+            </div>
+            <div class="topic-actions">
+                <a href="/knowledge-bases/{{ kb_id }}" class="btn">Manage</a>
+                <a href="/knowledge-bases/{{ kb_id }}/chat" class="btn btn-secondary">Chat</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; background: var(--bg-primary); border-radius: 12px;">
+        <div style="font-size: 3em; margin-bottom: 1rem;">📚</div>
+        <h3>No Knowledge Bases Yet</h3>
+        <p>Create your first knowledge base to get started with custom AI assistants!</p>
+        <a href="/knowledge-bases/create" class="btn" style="margin-top: 1rem;">Create Your First Knowledge Base</a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="content-section">
+    <h3>How It Works</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+        <div style="text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">1️⃣</div>
+            <h4>Create Knowledge Base</h4>
+            <p>Give your knowledge base a name and subject area</p>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">2️⃣</div>
+            <h4>Upload Files</h4>
+            <p>Add PDFs, documents, and text files with your content</p>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">3️⃣</div>
+            <h4>Chat with AI</h4>
+            <p>Get AI-powered answers based on your uploaded content</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <h1>🆕 Create Knowledge Base</h1>
+    <p>Build your custom AI assistant for any subject</p>
+</div>
+
+<div class="content-section">
+    <form id="createKbForm" onsubmit="createKnowledgeBase(event)">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="margin-bottom: 1.5rem;">
+                <label for="name" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Knowledge Base Name *</label>
+                <input type="text" id="name" name="name" required 
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);"
+                       placeholder="e.g., Python Programming Guide">
+            </div>
+
+            <div style="margin-bottom: 1.5rem;">
+                <label for="subject" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Subject Area</label>
+                <input type="text" id="subject" name="subject"
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);"
+                       placeholder="e.g., Programming, History, Medicine">
+            </div>
+
+            <div style="margin-bottom: 2rem;">
+                <label for="description" style="display: block; margin-bottom: 0.5rem; font-weight: 600;">Description</label>
+                <textarea id="description" name="description" rows="4"
+                          style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);"
+                          placeholder="Describe what this knowledge base will contain..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <a href="/knowledge-bases" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn" id="submitBtn">
+                    <span>Create Knowledge Base</span>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="content-section">
+    <h3>💡 Ideas for Knowledge Bases</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+            <strong>Academic Subjects</strong>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em;">Math, Science, Literature, History</p>
+        </div>
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+            <strong>Professional Skills</strong>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em;">Programming, Design, Marketing</p>
+        </div>
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+            <strong>Personal Interests</strong>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em;">Cooking, Music, Sports, Travel</p>
+        </div>
+        <div style="padding: 1rem; background: var(--bg-primary); border-radius: 8px;">
+            <strong>Business Documents</strong>
+            <p style="margin: 0.5rem 0 0 0; font-size: 0.9em;">Manuals, Procedures, Training</p>
+        </div>
+    </div>
+</div>
+
+<script>
+async function createKnowledgeBase(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const submitBtn = document.getElementById('submitBtn');
+    const originalText = submitBtn.innerHTML;
+    
+    // Show loading state
+    submitBtn.innerHTML = '<span>⏳ Creating...</span>';
+    submitBtn.disabled = true;
+    
+    try {
+        const formData = new FormData(form);
+        const response = await fetch('/knowledge-bases/create', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            // Show success message
+            submitBtn.innerHTML = '<span>✅ Created!</span>';
+            setTimeout(() => {
+                // Redirect to the new knowledge base
+                window.location.href = `/knowledge-bases/${result.kb_id}`;
+            }, 1000);
+        } else {
+            alert('Error: ' + result.message);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Error creating knowledge base: ' + error.message);
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    }
+}
+</script>
+{% endblock %}

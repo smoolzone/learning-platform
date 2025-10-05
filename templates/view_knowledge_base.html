@@ -1,0 +1,161 @@
+"""
+{% extends "base.html" %}
+
+{% block content %}
+<div class="header">
+    <div style="display: flex; justify-content: between; align-items: start;">
+        <div style="flex: 1;">
+            <h1>📖 {{ kb.name }}</h1>
+            <p>{{ kb.description }}</p>
+            <div style="margin-top: 1rem;">
+                <span style="background: var(--accent-primary); color: white; padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.9em;">
+                    {{ kb.subject or "General" }}
+                </span>
+            </div>
+        </div>
+        <div style="text-align: right;">
+            <a href="/knowledge-bases/{{ kb.id }}/chat" class="btn" style="display: inline-flex; align-items: center; gap: 0.5rem;">
+                <span>🤖</span>
+                <span>Chat with AI</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="content-section">
+    <h3>📁 Files & Documents</h3>
+    
+    <!-- File Upload Form -->
+    <div style="margin-bottom: 2rem; padding: 1.5rem; background: var(--bg-primary); border-radius: 12px;">
+        <h4>Upload New File</h4>
+        <form id="uploadForm" onsubmit="uploadFile(event)" style="display: flex; gap: 1rem; align-items: end;">
+            <div style="flex: 1;">
+                <input type="file" id="fileInput" name="file" accept=".pdf,.txt,.doc,.docx,.md" required
+                       style="width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+            </div>
+            <button type="submit" class="btn" id="uploadBtn">
+                <span>Upload File</span>
+            </button>
+        </form>
+        <p style="margin-top: 0.5rem; font-size: 0.9em; color: var(--text-secondary);">
+            Supported formats: PDF, TXT, DOC, DOCX, MD
+        </p>
+    </div>
+
+    <!-- Files List -->
+    {% if kb.files %}
+    <div style="border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; padding: 1rem; background: var(--bg-primary); border-bottom: 1px solid var(--border-color); font-weight: 600;">
+            <div>File Name</div>
+            <div>Size</div>
+            <div>Uploaded</div>
+        </div>
+        {% for file in kb.files %}
+        <div style="display: grid; grid-template-columns: 1fr auto auto; gap: 1rem; padding: 1rem; border-bottom: 1px solid var(--border-color); align-items: center;">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <span>📄</span>
+                <span>{{ file.name }}</span>
+            </div>
+            <div>{{ "%.1f"|format(file.size / 1024) }} KB</div>
+            <div>{{ file.uploaded_at[:10] }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 3rem; background: var(--bg-primary); border-radius: 12px;">
+        <div style="font-size: 3em; margin-bottom: 1rem;">📁</div>
+        <h4>No Files Yet</h4>
+        <p>Upload your first file to build your knowledge base!</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="content-section">
+    <h3>⚙️ Knowledge Base Actions</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-top: 1rem;">
+        <button onclick="parseFiles()" class="btn" style="text-align: center; padding: 1.5rem;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">🔍</div>
+            <div>Parse Files</div>
+            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Process uploaded files for AI</small>
+        </button>
+        
+        <a href="/knowledge-bases/{{ kb.id }}/chat" class="btn" style="text-align: center; padding: 1.5rem; text-decoration: none;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">🤖</div>
+            <div>Test Chat</div>
+            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">Chat with your AI assistant</small>
+        </a>
+        
+        <a href="/knowledge-bases" class="btn btn-secondary" style="text-align: center; padding: 1.5rem; text-decoration: none;">
+            <div style="font-size: 2em; margin-bottom: 0.5rem;">📚</div>
+            <div>All Bases</div>
+            <small style="display: block; margin-top: 0.5rem; opacity: 0.8;">View all knowledge bases</small>
+        </a>
+    </div>
+</div>
+
+<script>
+async function uploadFile(event) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const originalText = uploadBtn.innerHTML;
+    
+    if (!fileInput.files[0]) {
+        alert('Please select a file to upload');
+        return;
+    }
+    
+    // Show loading state
+    uploadBtn.innerHTML = '<span>⏳ Uploading...</span>';
+    uploadBtn.disabled = true;
+    
+    try {
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+        
+        const response = await fetch('/knowledge-bases/{{ kb.id }}/upload', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            uploadBtn.innerHTML = '<span>✅ Uploaded!</span>';
+            setTimeout(() => {
+                location.reload(); // Refresh to show new file
+            }, 1000);
+        } else {
+            alert('Error: ' + result.message);
+            uploadBtn.innerHTML = originalText;
+            uploadBtn.disabled = false;
+        }
+    } catch (error) {
+        alert('Error uploading file: ' + error.message);
+        uploadBtn.innerHTML = originalText;
+        uploadBtn.disabled = false;
+    }
+}
+
+async function parseFiles() {
+    try {
+        const response = await fetch('/knowledge-bases/{{ kb.id }}/parse', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert('Files parsed successfully! Your AI assistant is now ready.');
+        } else {
+            alert('Error: ' + result.message);
+        }
+    } catch (error) {
+        alert('Error parsing files: ' + error.message);
+    }
+}
+</script>
+{% endblock %}
+"""
