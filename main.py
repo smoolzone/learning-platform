@@ -25,9 +25,9 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # RAGFlow configuration - using the working proxy
-RAGFLOW_API_KEY = os.getenv("RAGFLOW_API_KEY", "ragflow-QyZGVhZmVlZTNjNjExZWY5ZDc1MDI0Mm")
-PROXY_BASE_URL = os.getenv("PROXY_BASE_URL", "http://158.220.108.117:8000")
-
+RAGFLOW_API_KEY = os.getenv("RAGFLOW_API_KEY", "")
+PROXY_BASE_URL = os.getenv("PROXY_BASE_URL", "")
+RAGFLOW_BASE_URL = os.getenv("RAGFLOW_BASE_URL")
 # Default chat and agent IDs
 DEFAULT_CHAT_ID = "ff5d683c260411f082740242ac120006"
 DEFAULT_AGENT_ID = "08a427fc819311f0bd500242ac120006"
@@ -244,6 +244,58 @@ async def test_connection():
     except Exception as e:
         print(f"Connection test failed: {e}")
         return False
+
+async def converse_with_chat(message: str, session_id: Optional[str] = None):
+    """Converse with general chat assistant"""
+    try:
+        headers = await get_ragflow_headers()
+        
+        data = {
+            "question": message,
+            "user_id": "web-user", 
+            "stream": True
+        }
+        if session_id:
+            data["session_id"] = session_id
+        
+        url = f"{PROXY_BASE_URL}/v1/chatbots/{DEFAULT_CHAT_ID}/completions"
+        
+        print(f"💬 General Chat: {message}")
+        
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.post(
+                url,
+                headers=headers,
+                json=data
+            )
+            
+        if response.status_code == 200:
+            full_answer = ""
+            lines = response.text.split("\n")
+            for line in lines:
+                if line.startswith("data: "):
+                    chunk = line[6:].strip()
+                    if chunk == "[DONE]":
+                        break
+                    try:
+                        js = json.loads(chunk)
+                        if js.get("event") == "message":
+                            content = js.get("data", {}).get("content", "")
+                            full_answer += content
+                        elif js.get("event") == "error":
+                            error_content = js.get('data', {}).get('content', 'Unknown error')
+                            print(f"Ignoring error event: {error_content}")
+                    except json.JSONDecodeError:
+                        full_answer += chunk + "\n"
+            
+            cleaned_response = clean_ai_response(full_answer.strip())
+            return cleaned_response if cleaned_response else "I'm here to help! How can I assist you today?"
+        else:
+            return "I'm your AI assistant. How can I help you explore this topic further?"
+                
+    except Exception as e:
+        print(f"Error in general chat: {e}")
+        return "I'm your AI assistant. How can I help you explore this topic further?"
 
 # FIXED Knowledge Base Routes
 @app.get("/knowledge-bases", response_class=HTMLResponse)
